@@ -1,0 +1,71 @@
+import React, { useState, useEffect } from 'react';
+import { Text, View, Button } from 'react-native';
+import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
+import { getFlavor } from './flavors';
+import LottieView from 'lottie-react-native';
+
+const HariboIA = () => {
+  const [message, setMessage] = useState('');
+  const [response, setResponse] = useState('');
+  const [avatarEmotion, setAvatarEmotion] = useState('calme');
+
+  const sendToHariboServer = async (msg) => {
+    const body = {
+      message: msg,
+      ibrahimState: avatarEmotion
+    };
+
+    try {
+      const res = await fetch('http://localhost:5050/haribo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      setResponse(data.réponse);
+      speakResponse(data.réponse);
+    } catch (error) {
+      console.error('Erreur connexion IA :', error);
+    }
+  };
+
+  const speakResponse = (text) => {
+    const flavor = getFlavor(avatarEmotion);
+    Speech.speak(text, { language: flavor.voix });
+  };
+
+  const handleActivation = () => {
+    const activationMsg = "Haribo Haribo, es-tu là ?";
+    setMessage(activationMsg);
+    sendToHariboServer(activationMsg);
+  };
+
+  const getAnimation = () => {
+    switch (avatarEmotion) {
+      case 'inspiration': return require('./assets/haribo-avatar/inspire.json');
+      case 'calme': return require('./assets/haribo-avatar/calm.json');
+      case 'energie haute': return require('./assets/haribo-avatar/energy.json');
+      default: return require('./assets/haribo-avatar/default.json');
+    }
+  };
+
+  return (
+    <View className="flex-1 items-center justify-center bg-black">
+      <Text className="text-white text-xl mb-4 font-bold">ÔROM IA – Avatar Conscient</Text>
+
+      <LottieView
+        source={getAnimation()}
+        autoPlay
+        loop
+        style={{ width: 300, height: 300 }}
+      />
+
+      <Text className="text-green-300 mt-6">{response}</Text>
+
+      <Button title="Appeler Haribo" onPress={handleActivation} color="#00ffc6" />
+    </View>
+  );
+};
+
+export default HariboIA;
