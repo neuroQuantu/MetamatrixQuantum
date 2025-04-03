@@ -1,0 +1,27 @@
+.import requests
+
+base_url = "http://127.0.0.1:5000"
+
+# Test route /api/test
+def test_api():
+    r = requests.get(f"{base_url}/api/test")
+    print("TEST API:", r.status_code, r.json())
+
+# Test PDF
+def test_pdf():
+    r = requests.post(f"{base_url}/api/generate-pdf", json={"patient_name": "Ibrahim Sakarya"})
+    with open("test_fiche_ibrahim.pdf", "wb") as f:
+        f.write(r.content)
+    print("PDF généré : test_fiche_ibrahim.pdf")
+
+# Test voix
+def test_voice():
+    r = requests.post(f"{base_url}/api/vocal-haribo", json={"text": "Bienvenue Ibrahim, je suis Haribo."})
+    with open("test_voice_haribo.mp3", "wb") as f:
+        f.write(r.content)
+    print("Audio généré : test_voice_haribo.mp3")
+
+if __name__ == "__main__":
+    test_api()
+    test_pdf()
+    test_voice()
